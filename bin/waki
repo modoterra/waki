@@ -1,0 +1,451 @@
+#!/usr/bin/env bash
+# Waki — Mise en place for Omarchy
+
+set -euo pipefail
+
+WAKI_ROOT="${WAKI_ROOT:-}"
+if [[ -z "$WAKI_ROOT" ]]; then
+  source="${BASH_SOURCE[0]}"
+  while [[ -L "$source" ]]; do
+    dir=$(cd -P "$(dirname "$source")" &>/dev/null && pwd)
+    source=$(readlink "$source")
+    [[ "$source" != /* ]] && source="$dir/$source"
+  done
+  script_dir=$(cd -P "$(dirname "$source")" &>/dev/null && pwd)
+  WAKI_ROOT=$(cd "$script_dir/.." && pwd)
+fi
+export WAKI_ROOT
+
+source "$WAKI_ROOT/lib/helpers.sh"
+source "$WAKI_ROOT/lib/database.sh"
+source "$WAKI_ROOT/lib/catalog.sh"
+source "$WAKI_ROOT/lib/profiles.sh"
+
+waki_require_tool gum     "Install from https://github.com/charmbracelet/gum"
+waki_require_tool jq      "Install via your package manager"
+waki_require_tool sqlite3 "Install via your package manager"
+waki_require_tool curl    "Install via your package manager"
+
+WAKI_VERSION="0.4.0"
+
+waki_db_init
+waki_profiles_sync
+
+waki_write_desktop_file() {
+  local app_name="$1"
+  local install_id="$2"
+  local icon_slug="$3"
+  local profile_dir="$4"
+
+  local label
+  label=$(waki_desktop_label "$app_name" "$profile_dir")
+
+  mkdir -p "$WAKI_ICON_DIR"
+  local icon_path="$WAKI_ICON_DIR/$app_name.png"
+  [[ ! -f "$icon_path" ]] && curl -sfL -o "$icon_path" "$WAKI_ICON_CDN/${icon_slug}.png" 2>/dev/null || true
+
+  cat > "$WAKI_DESKTOP_DIR/$label.desktop" <<DESKTOP
+[Desktop Entry]
+Version=1.0
+Name=$label
+Comment=$label
+Exec=waki-webapp-launch $install_id
+Terminal=false
+Type=Application
+Icon=$icon_path
+StartupNotify=true
+DESKTOP
+  chmod +x "$WAKI_DESKTOP_DIR/$label.desktop"
+}
+
+waki_install_app() {
+  local app_name="$1"
+  local profile_dir="${2:-Default}"
+
+  local app_data
+  app_data=$(waki_catalog_get "$app_name")
+  [[ -z "$app_data" ]] && return 1
+
+  IFS=$'\t' read -r id name url icon_slug category <<< "$app_data"
+
+  local profile_id
+  profile_id=$(waki_db_ensure_profile "$profile_dir")
+
+  if [[ -n "$(waki_db_is_installed "$id" "$profile_id")" ]]; then
+    waki_yellow "  Already installed: $(waki_desktop_label "$name" "$profile_dir")"
+    return 0
+  fi
+
+  waki_db_add_install "$id" "$profile_id"
+  local install_id
+  install_id=$(waki_db_get_install_id "$id" "$profile_id")
+
+  waki_write_desktop_file "$name" "$install_id" "$icon_slug" "$profile_dir"
+
+  waki_db_log_event "webapp_add" "$name ($profile_dir)"
+  command -v omarchy-hook &>/dev/null && omarchy-hook waki-webapp-install "$name" "$url" || true
+
+  waki_green "  Added: $(waki_desktop_label "$name" "$profile_dir")"
+}
+
+waki_webapp_add() {
+  local apps
+  apps=$(waki_catalog_list)
+  [[ -z "$apps" ]] && { waki_yellow "No apps in catalog."; return 0; }
+
+  local lines=()
+  while IFS=$'\t' read -r _id name _url _icon cat; do
+    lines+=("$name  ($cat)")
+  done <<< "$apps"
+
+  local selected
+  selected=$(printf '%s\n' "${lines[@]}" \
+    | gum filter --no-limit --height 20 --header "Select apps to add:") || true
+  [[ -z "$selected" ]] && { echo "No apps selected."; return 0; }
+
+  local profile_count
+  profile_count=$(waki_profiles_list | wc -l)
+
+  while IFS= read -r line; do
+    local app_name
+    app_name=$(echo "$line" | sed 's/  (.*//')
+
+    local chosen_profile="Default"
+    if (( profile_count > 1 )); then
+      chosen_profile=$(waki_profiles_choose "Profile for $app_name:") || { waki_yellow "  Skipped $app_name"; continue; }
+    fi
+
+    waki_install_app "$app_name" "$chosen_profile"
+  done <<< "$selected"
+
+  echo ""
+  waki_refresh_desktop
+  waki_green "Done! Launch apps via the app launcher (SUPER + SPACE)."
+}
+
+waki_webapp_remove() {
+  local installs
+  installs=$(waki_db_list_installs)
+  [[ -z "$installs" ]] && { waki_yellow "No web apps installed."; return 0; }
+
+  local labels=()
+  local install_ids=()
+  while IFS=$'\t' read -r install_id _app_id name _url _icon _cat profile_dir; do
+    labels+=("$(waki_desktop_label "$name" "$profile_dir")")
+    install_ids+=("$install_id")
+  done <<< "$installs"
+
+  local selected
+  selected=$(printf '%s\n' "${labels[@]}" \
+    | gum choose --no-limit --header "Select apps to remove:") || true
+  [[ -z "$selected" ]] && { echo "No apps selected."; return 0; }
+
+  while IFS= read -r label; do
+    rm -f "$WAKI_DESKTOP_DIR/$label.desktop"
+
+    local i=0
+    for stored_label in "${labels[@]}"; do
+      if [[ "$stored_label" == "$label" ]]; then
+        waki_db_remove_install "${install_ids[$i]}"
+        break
+      fi
+      ((i++))
+    done
+
+    waki_db_log_event "webapp_remove" "$label"
+    command -v omarchy-hook &>/dev/null && omarchy-hook waki-webapp-remove "$label" || true
+
+    waki_green "Removed: $label"
+  done <<< "$selected"
+
+  waki_refresh_desktop
+}
+
+waki_webapp_refresh() {
+  waki_profiles_sync
+  local installs
+  installs=$(waki_db_list_installs)
+  [[ -z "$installs" ]] && { waki_yellow "No web apps installed."; return 0; }
+
+  while IFS=$'\t' read -r install_id _app_id name _url icon_slug _cat profile_dir; do
+    local matches
+    matches=$(grep -l "Exec=waki-webapp-launch $install_id" "$WAKI_DESKTOP_DIR"/*.desktop 2>/dev/null || true)
+    if [[ -n "$matches" ]]; then
+      while IFS= read -r file; do
+        rm -f "$file"
+      done <<< "$matches"
+    fi
+
+    waki_write_desktop_file "$name" "$install_id" "$icon_slug" "$profile_dir"
+  done <<< "$installs"
+
+  waki_refresh_desktop
+  waki_green "Desktop entries refreshed."
+}
+
+waki_update() {
+  cd "$WAKI_ROOT"
+  local branch
+  branch=$(git branch --show-current 2>/dev/null || echo "unknown")
+
+  waki_yellow "Updating from $branch..."
+
+  if git pull --quiet; then
+    waki_db_migrate
+    waki_catalog_seed
+    waki_db_log_event "update" "$branch"
+    waki_green "Updated successfully."
+  else
+    waki_red "Update failed."
+    return 1
+  fi
+}
+
+waki_channel() {
+  local new_channel="${1:-}"
+
+  cd "$WAKI_ROOT"
+  local current_branch
+  current_branch=$(git branch --show-current 2>/dev/null || echo "unknown")
+
+  if [[ -z "$new_channel" ]]; then
+    echo "Current: $current_branch"
+    echo ""
+    new_channel=$(gum choose "stable" "canary" --header "Select channel:") || return 0
+  fi
+
+  local target_branch
+  case "$new_channel" in
+    stable|main) target_branch="main" ;;
+    canary)      target_branch="canary" ;;
+    *)           waki_red "Unknown channel: $new_channel"; return 1 ;;
+  esac
+
+  if [[ "$current_branch" == "$target_branch" ]]; then
+    waki_green "Already on $new_channel."
+    return 0
+  fi
+
+  waki_yellow "Switching to $new_channel..."
+  git fetch --quiet
+  if git checkout --quiet "$target_branch"; then
+    git pull --quiet
+    waki_green "Switched to $new_channel."
+  else
+    waki_red "Failed to switch channel."
+    return 1
+  fi
+}
+
+waki_about() {
+  local branch="unknown"
+  if cd "$WAKI_ROOT" 2>/dev/null; then
+    branch=$(git branch --show-current 2>/dev/null || echo "unknown")
+  fi
+
+  local installed_count catalog_count
+  installed_count=$(waki_db_get "SELECT COUNT(*) FROM waki_installs;" 2>/dev/null || echo "0")
+  catalog_count=$(waki_db_get "SELECT COUNT(*) FROM waki_webapps;" 2>/dev/null || echo "0")
+
+  gum style --border normal --border-foreground "#00ff99" --padding "1 2" \
+    "Waki v$WAKI_VERSION" \
+    "" \
+    "Mise en place for Omarchy" \
+    "" \
+    "Channel:  $branch" \
+    "Catalog:  $catalog_count apps ($installed_count installed)" \
+    "Root:     $WAKI_ROOT"
+}
+
+waki_uninstall() {
+  waki_red "This will permanently remove Waki and all installed web apps."
+  echo ""
+
+  if ! gum confirm "Are you sure?" --default=false; then
+    echo "Cancelled."
+    return 0
+  fi
+
+  echo ""
+
+  local installs
+  installs=$(waki_db_list_installs 2>/dev/null) || true
+  if [[ -n "$installs" ]]; then
+    while IFS=$'\t' read -r _iid _aid name _url _icon _cat profile_dir; do
+      local label
+      label=$(waki_desktop_label "$name" "$profile_dir")
+      rm -f "$WAKI_DESKTOP_DIR/$label.desktop"
+      rm -f "$WAKI_ICON_DIR/$name.png"
+    done <<< "$installs"
+  fi
+
+  rm -f "$WAKI_DB_PATH"
+
+  local bindings="$HOME/.config/hypr/bindings.conf"
+  if [[ -f "$bindings" ]] && grep -q "SUPER SHIFT, W, Waki" "$bindings"; then
+    sed -i '/SUPER SHIFT, W, Waki/d' "$bindings"
+    sed -i '/^$/N;/^\n$/d' "$bindings"
+  fi
+
+  rm -f "$WAKI_BIN_DIR/waki"
+  rm -f "$WAKI_BIN_DIR/waki-webapp-launch"
+  rm -f "$HOME/.local/share/omarchy/bin/waki-webapp-launch"
+
+  local hooks_dir="$HOME/.config/omarchy/hooks"
+  if [[ -d "$hooks_dir" ]]; then
+    for sample in "$WAKI_ROOT"/hooks/*.sample; do
+      [[ ! -f "$sample" ]] && continue
+      local sample_name
+      sample_name=$(basename "$sample")
+      rm -f "$hooks_dir/$sample_name"
+    done
+  fi
+
+  local hooks_dir="$HOME/.config/omarchy/hooks"
+  if [[ -d "$hooks_dir" ]]; then
+    for sample in "$WAKI_ROOT"/hooks/*.sample; do
+      [[ ! -f "$sample" ]] && continue
+      local sample_name
+      sample_name=$(basename "$sample")
+      rm -f "$hooks_dir/$sample_name"
+    done
+  fi
+
+  if [[ "$WAKI_ROOT" == "$HOME/.local/share/waki" && -d "$WAKI_ROOT" ]]; then
+    rm -rf "$WAKI_ROOT"
+  fi
+
+  echo ""
+  waki_green "Waki has been uninstalled."
+}
+
+waki_help() {
+  cat <<HELP
+Waki — Mise en place for Omarchy
+
+Usage: waki [command] [subcommand]
+
+  webapp add       Add web apps from the catalog
+  webapp remove    Remove installed web apps
+  webapp refresh   Regenerate desktop entries
+  channel [name]   Switch between stable / canary
+  update           Update Waki from git
+  about            Show version and stats
+  uninstall        Completely remove Waki
+  help             Show this help
+
+Run without arguments for the interactive menu.
+HELP
+}
+
+WAKI_CHEFS_PICKS=("ChatGPT" "Gmail" "YouTube" "GitHub" "Google Calendar" "Notion" "Discord" "WhatsApp")
+
+waki_first_run() {
+  local first_run
+  first_run=$(waki_db_get "SELECT 1 FROM waki_events WHERE kind = 'first_run' LIMIT 1;" 2>/dev/null || true)
+  [[ -n "$first_run" ]] && return 0
+
+  clear
+  gum style --border normal --border-foreground "#00ff99" --padding "1 2" \
+    "Welcome to Waki" \
+    "" \
+    "Every chef needs a right hand." \
+    "" \
+    "Here are the chef's recommendations to get you started." \
+    "Deselect any you don't need, then press Enter."
+  echo ""
+
+  local picks=()
+  for app in "${WAKI_CHEFS_PICKS[@]}"; do
+    [[ -n "$(waki_catalog_get "$app")" ]] && picks+=("$app")
+  done
+
+  if [[ ${#picks[@]} -eq 0 ]]; then
+    waki_db_log_event "first_run" "skipped"
+    return 0
+  fi
+
+  local selected
+  local IFS_BAK="$IFS"
+  IFS=","
+  local picks_csv="${picks[*]}"
+  IFS="$IFS_BAK"
+  selected=$(printf '%s\n' "${picks[@]}" \
+    | gum choose --no-limit --height 12 \
+        --selected "$picks_csv" \
+        --header "Chef's Recommendations:") || true
+
+  if [[ -z "$selected" ]]; then
+    echo "No apps selected — you can always add them later."
+  else
+    echo ""
+    while IFS= read -r app_name; do
+      waki_install_app "$app_name" "Default"
+    done <<< "$selected"
+    echo ""
+    waki_refresh_desktop
+    waki_green "Done! Launch apps via the app launcher (SUPER + SPACE)."
+  fi
+
+  waki_db_log_event "first_run" "completed"
+
+  echo ""
+  gum input --placeholder "Press Enter to continue..." > /dev/null 2>&1 || true
+}
+
+waki_menu() {
+  waki_first_run
+
+  while true; do
+    clear
+    gum style --border normal --border-foreground "#00ff99" --padding "0 1" \
+      "Waki — Mise en place for Omarchy"
+    echo ""
+
+    local choice
+    choice=$(gum choose \
+      "webapp add" \
+      "webapp remove" \
+      "webapp refresh" \
+      "channel" \
+      "update" \
+      "about" \
+      "uninstall" \
+      "exit" \
+      --cursor.foreground "#00ff99") || exit 0
+
+    echo ""
+
+    case "$choice" in
+      "webapp add")    waki_webapp_add ;;
+      "webapp remove") waki_webapp_remove ;;
+      "webapp refresh") waki_webapp_refresh ;;
+      "channel")       waki_channel ;;
+      "update")        waki_update ;;
+      "about")         waki_about ;;
+      "uninstall")     waki_uninstall; exit 0 ;;
+      "exit")          exit 0 ;;
+    esac
+
+    echo ""
+    gum input --placeholder "Press Enter to continue..." > /dev/null 2>&1 || true
+  done
+}
+
+case "${1:-}" in
+  webapp)
+    case "${2:-}" in
+      add)    waki_webapp_add ;;
+      remove) waki_webapp_remove ;;
+      refresh) waki_webapp_refresh ;;
+      *)      echo "Usage: waki webapp {add|remove|refresh}"; exit 1 ;;
+    esac
+    ;;
+  channel)   waki_channel "${2:-}" ;;
+  update)    waki_update ;;
+  about)     waki_about ;;
+  uninstall) waki_uninstall ;;
+  help|--help|-h) waki_help ;;
+  "")        waki_menu ;;
+  *)         echo "Unknown command: $1"; echo "Run 'waki help' for usage."; exit 1 ;;
+esac

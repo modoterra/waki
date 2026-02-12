@@ -1,0 +1,10 @@
+#!/bin/bash
+
+# This hook is called after a web app is removed via Waki.
+# To put it into use, remove .sample from the name.
+#
+# Arguments:
+#   $1 — App name (e.g. "ChatGPT")
+
+# Example: Show a notification when a web app is removed.
+# notify-send "Waki" "$1 has been removed"

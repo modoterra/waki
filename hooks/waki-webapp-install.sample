@@ -1,0 +1,11 @@
+#!/bin/bash
+
+# This hook is called after a web app is installed via Waki.
+# To put it into use, remove .sample from the name.
+#
+# Arguments:
+#   $1 — App name (e.g. "ChatGPT")
+#   $2 — App URL  (e.g. "https://chatgpt.com")
+
+# Example: Show a notification when a web app is installed.
+# notify-send "Waki" "$1 has been installed"

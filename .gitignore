@@ -1,0 +1,28 @@
+database/waki.db
+database/waki.db-journal
+database/waki.db-wal
+database/waki.db-shm
+
+# Environment and secrets
+.env
+.env.*
+!.env.example
+*.key
+*.pem
+*.p12
+*.pfx
+*.crt
+*.cer
+
+# Databases and logs
+*.db
+*.sqlite
+*.sqlite3
+*.db-*
+*.sqlite-*
+*.log
+
+# OS/editor noise
+.DS_Store
+*~
+*.swp

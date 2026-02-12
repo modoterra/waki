@@ -1,0 +1,55 @@
+#!/usr/bin/env bash
+# Launch a web app by install ID.
+# Queries the waki database for URL and profile, then launches in Chromium.
+
+set -euo pipefail
+
+if [[ $# -lt 1 ]]; then
+  echo "Usage: waki-webapp-launch <install-id>"
+  exit 1
+fi
+
+INSTALL_ID="$1"
+shift
+
+if [[ -z "${WAKI_ROOT:-}" ]]; then
+  source_path="${BASH_SOURCE[0]}"
+  while [[ -L "$source_path" ]]; do
+    source_dir=$(cd -P "$(dirname "$source_path")" &>/dev/null && pwd)
+    source_path=$(readlink "$source_path")
+    [[ "$source_path" != /* ]] && source_path="$source_dir/$source_path"
+  done
+  script_dir=$(cd -P "$(dirname "$source_path")" &>/dev/null && pwd)
+  WAKI_ROOT=$(cd "$script_dir/.." && pwd)
+fi
+export WAKI_ROOT
+
+if [[ -f "$WAKI_ROOT/lib/helpers.sh" ]]; then
+  source "$WAKI_ROOT/lib/helpers.sh"
+fi
+
+DB="${WAKI_DB_PATH:-$HOME/.local/share/waki/database/waki.db}"
+
+# One query for everything we need
+IFS=$'\t' read -r URL PROFILE < <(sqlite3 -separator $'\t' "$DB" "
+  SELECT w.url, p.directory
+  FROM waki_installs i
+  JOIN waki_webapps w  ON w.id = i.webapp_id
+  JOIN waki_profiles p ON p.id = i.profile_id
+  WHERE i.id = $INSTALL_ID;")
+
+if [[ -z "${URL:-}" ]]; then
+  echo "Error: install $INSTALL_ID not found"
+  exit 1
+fi
+
+# Resolve Chromium binary
+binary=$(cat {~/.local,~/.nix-profile,/usr}/share/applications/chromium.desktop 2>/dev/null \
+  | sed -n 's/^Exec=\([^ ]*\).*/\1/p' | head -1) || true
+
+if [[ -z "$binary" ]]; then
+  echo "Error: could not find chromium"
+  exit 1
+fi
+
+exec setsid uwsm-app -- "$binary" --app="$URL" --new-window --profile-directory="$PROFILE" "$@"
