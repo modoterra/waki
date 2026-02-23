@@ -20,6 +20,7 @@ source "$WAKI_ROOT/lib/helpers.sh"
 source "$WAKI_ROOT/lib/database.sh"
 source "$WAKI_ROOT/lib/catalog.sh"
 source "$WAKI_ROOT/lib/profiles.sh"
+source "$WAKI_ROOT/lib/aliases.sh"
 
 waki_require_tool gum     "Install from https://github.com/charmbracelet/gum"
 waki_require_tool jq      "Install via your package manager"
@@ -183,6 +184,62 @@ waki_webapp_refresh() {
   waki_green "Desktop entries refreshed."
 }
 
+waki_alias_add() {
+  local bashrc
+  bashrc=$(waki_aliases_bashrc_path)
+
+  waki_aliases_add_to_bashrc
+  waki_db_log_event "alias_add" "$bashrc"
+
+  waki_green "Git aliases enabled in $bashrc"
+  echo "Run 'source $bashrc' (or open a new shell) to use them now."
+}
+
+waki_alias_remove() {
+  local bashrc
+  bashrc=$(waki_aliases_bashrc_path)
+
+  if waki_aliases_block_present; then
+    waki_aliases_remove_from_bashrc
+    waki_db_log_event "alias_remove" "$bashrc"
+    waki_green "Git aliases removed from $bashrc"
+  else
+    waki_yellow "No Waki alias block found in $bashrc"
+  fi
+}
+
+waki_alias_refresh() {
+  local bashrc
+  bashrc=$(waki_aliases_bashrc_path)
+
+  waki_aliases_refresh_in_bashrc
+  waki_db_log_event "alias_refresh" "$bashrc"
+
+  waki_green "Git aliases refreshed in $bashrc"
+  echo "Run 'source $bashrc' (or open a new shell) to use updates now."
+}
+
+waki_alias_status() {
+  local bashrc alias_file
+  bashrc=$(waki_aliases_bashrc_path)
+  alias_file=$(waki_aliases_git_file)
+
+  echo "Bashrc: $bashrc"
+  echo "Alias file: $alias_file"
+
+  if waki_aliases_block_present; then
+    waki_green "Status: enabled"
+  else
+    waki_yellow "Status: disabled"
+  fi
+
+  if [[ -f "$alias_file" ]]; then
+    waki_green "Bundle: present"
+  else
+    waki_red "Bundle: missing"
+  fi
+}
+
 waki_update() {
   cd "$WAKI_ROOT"
   local branch
@@ -287,6 +344,8 @@ waki_uninstall() {
     sed -i '/^$/N;/^\n$/d' "$bindings"
   fi
 
+  waki_aliases_remove_from_bashrc
+
   rm -f "$WAKI_BIN_DIR/waki"
   rm -f "$WAKI_BIN_DIR/waki-webapp-launch"
   rm -f "$HOME/.local/share/omarchy/bin/waki-webapp-launch"
@@ -328,6 +387,10 @@ Usage: waki [command] [subcommand]
   webapp add       Add web apps from the catalog
   webapp remove    Remove installed web apps
   webapp refresh   Regenerate desktop entries
+  alias add        Add git aliases to ~/.bashrc
+  alias remove     Remove git aliases from ~/.bashrc
+  alias refresh    Refresh git aliases in ~/.bashrc
+  alias status     Show git alias status
   channel [name]   Switch between stable / canary
   update           Update Waki from git
   about            Show version and stats
@@ -407,6 +470,10 @@ waki_menu() {
       "webapp add" \
       "webapp remove" \
       "webapp refresh" \
+      "alias add" \
+      "alias remove" \
+      "alias refresh" \
+      "alias status" \
       "channel" \
       "update" \
       "about" \
@@ -420,6 +487,10 @@ waki_menu() {
       "webapp add")    waki_webapp_add ;;
       "webapp remove") waki_webapp_remove ;;
       "webapp refresh") waki_webapp_refresh ;;
+      "alias add")     waki_alias_add ;;
+      "alias remove")  waki_alias_remove ;;
+      "alias refresh") waki_alias_refresh ;;
+      "alias status")  waki_alias_status ;;
       "channel")       waki_channel ;;
       "update")        waki_update ;;
       "about")         waki_about ;;
@@ -439,6 +510,15 @@ case "${1:-}" in
       remove) waki_webapp_remove ;;
       refresh) waki_webapp_refresh ;;
       *)      echo "Usage: waki webapp {add|remove|refresh}"; exit 1 ;;
+    esac
+    ;;
+  alias)
+    case "${2:-}" in
+      add)     waki_alias_add ;;
+      remove)  waki_alias_remove ;;
+      refresh) waki_alias_refresh ;;
+      status)  waki_alias_status ;;
+      *)       echo "Usage: waki alias {add|remove|refresh|status}"; exit 1 ;;
     esac
     ;;
   channel)   waki_channel "${2:-}" ;;

@@ -25,6 +25,7 @@ setup_test_env() {
   source "$WAKI_ROOT/lib/database.sh"
   source "$WAKI_ROOT/lib/catalog.sh"
   source "$WAKI_ROOT/lib/profiles.sh"
+  source "$WAKI_ROOT/lib/aliases.sh"
 
   waki_db_init
   waki_profiles_sync

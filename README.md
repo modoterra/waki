@@ -38,12 +38,28 @@ Run `waki` for the interactive TUI, or use commands directly:
 waki webapp add       Add web apps from the catalog
 waki webapp remove    Remove installed web apps
 waki webapp refresh   Regenerate desktop entries
+waki alias add        Add Oh My Zsh-style git aliases to ~/.bashrc
+waki alias remove     Remove Waki git aliases from ~/.bashrc
+waki alias refresh    Refresh the Waki git alias block in ~/.bashrc
+waki alias status     Show git alias status
 waki channel [name]   Switch between stable / canary
 waki update           Update Waki from git
 waki about            Show version and stats
 waki uninstall        Completely remove Waki
 waki help             Show this help
 ```
+
+## Git aliases
+
+Waki ships an extensive Oh My Zsh-inspired git alias bundle at `lib/aliases/git.sh`.
+
+Enable it on demand:
+
+```bash
+waki alias add
+```
+
+This writes a managed block in `~/.bashrc` that sources Waki's alias file. Use `waki alias remove` to remove it, `waki alias refresh` after updates, or `waki alias status` to check whether the block is enabled.
 
 ## Hooks
 

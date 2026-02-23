@@ -13,6 +13,19 @@ waki_db_init() {
   fi
 }
 
+waki_db_mark_migration_applied() {
+  local name="$1"
+  local esc_name
+  esc_name=$(waki_sql_escape "$name")
+  sqlite3 "$WAKI_DB_PATH" "INSERT INTO migrations (name) VALUES ('$esc_name');"
+}
+
+waki_db_has_profile_display_name_column() {
+  local exists
+  exists=$(sqlite3 "$WAKI_DB_PATH" "SELECT 1 FROM pragma_table_info('waki_profiles') WHERE name = 'display_name' LIMIT 1;" 2>/dev/null || true)
+  [[ -n "$exists" ]]
+}
+
 waki_db_migrate() {
   local migrations_dir="$WAKI_ROOT/database/migrations"
 
@@ -29,8 +42,14 @@ waki_db_migrate() {
     local applied
     applied=$(sqlite3 "$WAKI_DB_PATH" "SELECT 1 FROM migrations WHERE name='$name' LIMIT 1;" 2>/dev/null || true)
     [[ -n "$applied" ]] && continue
+
+    if [[ "$name" == "0002-profile-display-name.sql" ]] && waki_db_has_profile_display_name_column; then
+      waki_db_mark_migration_applied "$name"
+      continue
+    fi
+
     sqlite3 "$WAKI_DB_PATH" < "$migration"
-    sqlite3 "$WAKI_DB_PATH" "INSERT INTO migrations (name) VALUES ('$name');"
+    waki_db_mark_migration_applied "$name"
   done
 }
 

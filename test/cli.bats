@@ -65,3 +65,35 @@ teardown() {
   assert_failure
   assert_output --partial "Usage: waki webapp"
 }
+
+@test "waki alias unknown subcommand exits 1" {
+  run "$WAKI_BIN" alias notasub
+  assert_failure
+  assert_output --partial "Usage: waki alias"
+}
+
+@test "waki alias status shows disabled before add" {
+  run "$WAKI_BIN" alias status
+  assert_success
+  assert_output --partial "Status: disabled"
+}
+
+@test "waki alias add writes managed bashrc block" {
+  run "$WAKI_BIN" alias add
+  assert_success
+  assert [ -f "$HOME/.bashrc" ]
+
+  run grep -F "# >>> waki git aliases >>>" "$HOME/.bashrc"
+  assert_success
+  run grep -F "$WAKI_ROOT/lib/aliases/git.sh" "$HOME/.bashrc"
+  assert_success
+}
+
+@test "waki alias status shows enabled after add" {
+  run "$WAKI_BIN" alias add
+  assert_success
+
+  run "$WAKI_BIN" alias status
+  assert_success
+  assert_output --partial "Status: enabled"
+}
