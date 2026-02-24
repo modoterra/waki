@@ -35,6 +35,14 @@ This Code of Conduct applies within all community spaces, and also applies when 
 
 Community leaders are responsible for clarifying and enforcing our standards of acceptable behavior and will take appropriate and fair corrective action in response to any behavior that they deem inappropriate, threatening, offensive, or harmful.
 
+## Maintainer Authority
+
+Modoterra Corporation and its designated maintainers have sole and final discretion to interpret, apply, and enforce this Code of Conduct.
+
+To the maximum extent permitted by law, Modoterra Corporation may take any action it deems appropriate in response to conduct it considers harmful, disruptive, unsafe, unlawful, or inconsistent with project goals, including but not limited to warning, content removal, issue or pull request closure, contribution rejection, temporary suspension, permanent ban, or escalation to legal authorities.
+
+Enforcement decisions are final.
+
 ## Enforcement Guidelines
 
 Community leaders will follow these Community Impact Guidelines in determining the consequences for any action they deem in violation of this Code of Conduct:
