@@ -21,6 +21,7 @@ source "$WAKI_ROOT/lib/database.sh"
 source "$WAKI_ROOT/lib/catalog.sh"
 source "$WAKI_ROOT/lib/profiles.sh"
 source "$WAKI_ROOT/lib/aliases.sh"
+source "$WAKI_ROOT/lib/apps.sh"
 
 waki_require_tool gum     "Install from https://github.com/charmbracelet/gum"
 waki_require_tool jq      "Install via your package manager"
@@ -240,6 +241,52 @@ waki_alias_status() {
   fi
 }
 
+waki_app_add() {
+  local app_name="${1:-}"
+  if [[ -z "$app_name" ]]; then
+    app_name=$(gum choose "vscode" --header "Select app to add:") || true
+    [[ -z "$app_name" ]] && { echo "No app selected."; return 0; }
+  fi
+
+  if [[ "$app_name" != "vscode" ]]; then
+    waki_red "Unknown app: $app_name"
+    echo "Use 'waki app add' to pick from the supported app list."
+    return 1
+  fi
+
+  local package settings_path
+  package=$(waki_apps_vscode_package)
+  settings_path=$(waki_apps_vscode_settings_path)
+
+  waki_yellow "Installing VS Code ($package) with omarchy-install-vscode..."
+  if ! waki_apps_install_vscode; then
+    waki_red "VS Code installation failed."
+    return 1
+  fi
+
+  waki_db_log_event "app_add" "vscode"
+
+  waki_green "VS Code is ready."
+  waki_yellow "Bootstrap settings pending."
+  echo "Settings target: $settings_path"
+  echo "Send your trimmed settings.json and I'll wire refresh/remove next."
+}
+
+waki_app_status() {
+  local package settings_path
+  package=$(waki_apps_vscode_package)
+  settings_path=$(waki_apps_vscode_settings_path)
+
+  echo "VS Code package: $package"
+  echo "Settings target: $settings_path"
+
+  if waki_apps_vscode_installed; then
+    waki_green "Install: present"
+  else
+    waki_yellow "Install: missing"
+  fi
+}
+
 waki_update() {
   cd "$WAKI_ROOT"
   local branch
@@ -387,6 +434,8 @@ Usage: waki [command] [subcommand]
   webapp add       Add web apps from the catalog
   webapp remove    Remove installed web apps
   webapp refresh   Regenerate desktop entries
+  app add [name]   Install supported app via Omarchy
+  app status       Show VS Code bootstrap status
   alias add        Add git aliases to ~/.bashrc
   alias remove     Remove git aliases from ~/.bashrc
   alias refresh    Refresh git aliases in ~/.bashrc
@@ -470,6 +519,8 @@ waki_menu() {
       "webapp add" \
       "webapp remove" \
       "webapp refresh" \
+      "app add" \
+      "app status" \
       "alias add" \
       "alias remove" \
       "alias refresh" \
@@ -487,6 +538,8 @@ waki_menu() {
       "webapp add")    waki_webapp_add ;;
       "webapp remove") waki_webapp_remove ;;
       "webapp refresh") waki_webapp_refresh ;;
+      "app add")       waki_app_add ;;
+      "app status")    waki_app_status ;;
       "alias add")     waki_alias_add ;;
       "alias remove")  waki_alias_remove ;;
       "alias refresh") waki_alias_refresh ;;
@@ -510,6 +563,13 @@ case "${1:-}" in
       remove) waki_webapp_remove ;;
       refresh) waki_webapp_refresh ;;
       *)      echo "Usage: waki webapp {add|remove|refresh}"; exit 1 ;;
+    esac
+    ;;
+  app)
+    case "${2:-}" in
+      add)    waki_app_add "${3:-}" ;;
+      status) waki_app_status ;;
+      *)      echo "Usage: waki app {add|status}"; exit 1 ;;
     esac
     ;;
   alias)

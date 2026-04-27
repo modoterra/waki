@@ -38,6 +38,8 @@ teardown() {
   assert_output --partial "Usage: waki"
   assert_output --partial "webapp add"
   assert_output --partial "webapp refresh"
+  assert_output --partial "app add"
+  assert_output --partial "app status"
   assert_output --partial "uninstall"
 }
 
@@ -70,6 +72,68 @@ teardown() {
   run "$WAKI_BIN" alias notasub
   assert_failure
   assert_output --partial "Usage: waki alias"
+}
+
+@test "waki app unknown subcommand exits 1" {
+  run "$WAKI_BIN" app notasub
+  assert_failure
+  assert_output --partial "Usage: waki app"
+}
+
+@test "waki app status shows settings target" {
+  run "$WAKI_BIN" app status
+  assert_success
+  assert_output --partial "VS Code package: visual-studio-code-bin"
+  assert_output --partial "Settings target:"
+  assert_output --partial "Code/User/settings.json"
+}
+
+@test "waki app add with unknown name exits 1" {
+  run "$WAKI_BIN" app add notarealapp
+  assert_failure
+  assert_output --partial "Unknown app"
+}
+
+@test "waki app add installs VS Code via omarchy command" {
+  cat > "$WAKI_BIN_DIR/gum" <<'STUB'
+#!/usr/bin/env bash
+case "${1:-}" in
+  style)
+    shift
+    while [[ "${1:-}" == --* ]]; do shift; done
+    echo "$@"
+    ;;
+  choose)
+    echo "vscode"
+    ;;
+  filter|input|confirm)
+    exit 1
+    ;;
+  *)
+    exit 1
+    ;;
+esac
+STUB
+  chmod +x "$WAKI_BIN_DIR/gum"
+
+  cat > "$WAKI_BIN_DIR/omarchy-install-vscode" <<'STUB'
+#!/usr/bin/env bash
+touch "$HOME/omarchy_install_called"
+STUB
+  chmod +x "$WAKI_BIN_DIR/omarchy-install-vscode"
+
+  run "$WAKI_BIN" app add
+  assert_success
+  assert_output --partial "VS Code is ready"
+  assert [ -f "$HOME/omarchy_install_called" ]
+}
+
+@test "waki app add fails when omarchy installer is missing" {
+  export PATH="$WAKI_BIN_DIR:/usr/bin:/bin"
+
+  run "$WAKI_BIN" app add vscode
+  assert_failure
+  assert_output --partial "omarchy-install-vscode is required"
 }
 
 @test "waki alias status shows disabled before add" {
