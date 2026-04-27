@@ -24,5 +24,6 @@ database/waki.db-shm
 
 # OS/editor noise
 .DS_Store
+.codex
 *~
 *.swp
