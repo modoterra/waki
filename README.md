@@ -38,6 +38,8 @@ Run `waki` for the interactive TUI, or use commands directly:
 waki webapp add       Add web apps from the catalog
 waki webapp remove    Remove installed web apps
 waki webapp refresh   Regenerate desktop entries
+waki app add [name]   Install supported app via Omarchy
+waki app status       Show VS Code bootstrap status
 waki alias add        Add Oh My Zsh-style git aliases to ~/.bashrc
 waki alias remove     Remove Waki git aliases from ~/.bashrc
 waki alias refresh    Refresh the Waki git alias block in ~/.bashrc
@@ -60,6 +62,14 @@ waki alias add
 ```
 
 This writes a managed block in `~/.bashrc` that sources Waki's alias file. Use `waki alias remove` to remove it, `waki alias refresh` after updates, or `waki alias status` to check whether the block is enabled.
+
+## Apps
+
+Use `waki app add` to pick from supported apps (currently `vscode`). Waki delegates installation to `omarchy-install-vscode` for canonical Omarchy behavior.
+
+For bootstrap path detection, Waki targets `~/.config/Code/User/settings.json`.
+
+Run `waki app status` to see whether VS Code is installed and which settings target path Waki will use.
 
 ## Hooks
 
