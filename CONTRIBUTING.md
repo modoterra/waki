@@ -10,12 +10,12 @@ cd waki
 omarchy plugin validate .
 ```
 
-For a live session, copy or clone this repo into `~/.config/omarchy/plugins/modoterra.waki/` (not a symlink; `omarchy plugin add` rejects symlinks), then:
+For a live session, copy or clone this repo into `~/.config/omarchy/plugins/com.mdtrr.waki/` (not a symlink; `omarchy plugin add` rejects symlinks), then:
 
 ```bash
 omarchy-shell shell rescanPlugins
-omarchy plugin enable modoterra.waki
-omarchy-shell shell toggle modoterra.waki
+omarchy plugin enable com.mdtrr.waki
+omarchy-shell shell toggle com.mdtrr.waki
 ```
 
 ## Running tests

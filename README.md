@@ -12,15 +12,15 @@ The name comes from the Japanese kitchen hierarchy: the *wakiita* (脇板) is th
 omarchy plugin add https://github.com/modoterra/waki.git --enable
 ```
 
-That clones the plugin into `~/.config/omarchy/plugins/modoterra.waki/`, validates `manifest.json`, and enables it. On first enable the service writes a Super+Shift+Alt+W keybind (if that chord is free) and a **Waki** row in the Omarchy menu.
+That clones the plugin into `~/.config/omarchy/plugins/com.mdtrr.waki/`, validates `manifest.json`, and enables it. On first enable the service writes a Super+Shift+Alt+W keybind (if that chord is free) and a **Waki** row in the Omarchy menu.
 
 Open Waki with Super+Shift+Alt+W, the Omarchy menu, or:
 
 ```bash
-omarchy-shell shell toggle modoterra.waki
+omarchy-shell shell toggle com.mdtrr.waki
 ```
 
-Update with `omarchy plugin update modoterra.waki`. Remove desktop integration from Waki's Uninstall action, then `omarchy plugin remove modoterra.waki`.
+Update with `omarchy plugin update com.mdtrr.waki`. Remove desktop integration from Waki's Uninstall action, then `omarchy plugin remove com.mdtrr.waki`.
 
 ## What it does
 

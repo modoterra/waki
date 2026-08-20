@@ -1,4 +1,4 @@
-var PLUGIN_ID = "modoterra.waki"
+var PLUGIN_ID = "com.mdtrr.waki"
 var ICON_CDN = "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png"
 
 var CHEF_PICKS = [
@@ -273,19 +273,24 @@ function keybindBody(chord) {
   return "o.bind(\"" + chord + "\", \"Waki\", \"" + TOGGLE_COMMAND + "\")"
 }
 
-function applyKeybindBlock(text, chord) {
+function applyKeybindBlock(text, chord, createIfMissing) {
+  if (createIfMissing === undefined) createIfMissing = true
   var usedChord = String(chord || DEFAULT_KEYBIND_CHORD)
   var source = String(text || "")
-  if (hasMarkedBlock(source, KEYBIND_BLOCK_START, KEYBIND_BLOCK_END))
-    return { text: source, changed: false, skipped: "" }
+  var hadBlock = hasMarkedBlock(source, KEYBIND_BLOCK_START, KEYBIND_BLOCK_END)
   var without = removeMarkedBlock(source, KEYBIND_BLOCK_START, KEYBIND_BLOCK_END)
-  if (without.indexOf(usedChord) !== -1)
-    return { text: source, changed: false, skipped: "taken" }
-  return {
-    text: insertMarkedBlock(source, KEYBIND_BLOCK_START, KEYBIND_BLOCK_END, keybindBody(usedChord)),
-    changed: true,
-    skipped: ""
+  if (!hadBlock) {
+    if (!createIfMissing)
+      return { text: source, changed: false, skipped: "" }
+    if (without.indexOf(usedChord) !== -1)
+      return { text: source, changed: false, skipped: "taken" }
   }
+  if (hadBlock && source.indexOf(TOGGLE_COMMAND) !== -1)
+    return { text: source, changed: false, skipped: "" }
+  var next = insertMarkedBlock(source, KEYBIND_BLOCK_START, KEYBIND_BLOCK_END, keybindBody(usedChord))
+  if (next === source)
+    return { text: source, changed: false, skipped: "" }
+  return { text: next, changed: true, skipped: "" }
 }
 
 function removeKeybindBlock(text) {
@@ -305,11 +310,18 @@ function hasJsoncKey(text, key) {
   return new RegExp("\"" + key + "\"\\s*:").test(String(text || ""))
 }
 
-function applyMenuEntry(text) {
+function applyMenuEntry(text, createIfMissing) {
+  if (createIfMissing === undefined) createIfMissing = true
   var source = String(text || "")
-  if (hasJsoncKey(source, "waki"))
-    return { text: source, changed: false }
   var value = JSON.stringify(menuEntryJson())
+  if (hasJsoncKey(source, "waki")) {
+    if (source.indexOf(TOGGLE_COMMAND) !== -1)
+      return { text: source, changed: false }
+    var replaced = source.replace(/"waki"\s*:\s*\{[^}]*\}/, "\"waki\": " + value)
+    return { text: replaced, changed: replaced !== source }
+  }
+  if (!createIfMissing)
+    return { text: source, changed: false }
   var open = source.indexOf("{")
   if (open === -1) {
     return { text: "{\n  \"waki\": " + value + "\n}\n", changed: true }

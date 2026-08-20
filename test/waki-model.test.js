@@ -178,6 +178,21 @@ describe("marked blocks", () => {
   const end = WakiModel.KEYBIND_BLOCK_END
   const chord = "SUPER + SHIFT + ALT + W"
 
+  it("rewrites a marked keybind block when the plugin id changes", () => {
+    const oldBlock = [
+      "keep me",
+      "-- >>> waki keybind >>>",
+      'o.bind("SUPER + SHIFT + ALT + W", "Waki", "omarchy-shell shell toggle modoterra.waki")',
+      "-- <<< waki keybind <<<",
+      ""
+    ].join("\n")
+    const result = WakiModel.applyKeybindBlock(oldBlock, chord)
+    assert.equal(result.changed, true)
+    assert.match(result.text, /toggle com\.mdtrr\.waki/)
+    assert.doesNotMatch(result.text, /toggle modoterra\.waki/)
+    assert.match(result.text, /keep me/)
+  })
+
   it("inserts a keybind block and is idempotent", () => {
     const once = WakiModel.applyKeybindBlock("hl = {}\n", chord)
     const twice = WakiModel.applyKeybindBlock(once.text, chord)
@@ -185,7 +200,7 @@ describe("marked blocks", () => {
     assert.equal(twice.changed, false)
     assert.equal((twice.text.match(/o\.bind/g) || []).length, 1)
     assert.match(twice.text, new RegExp(start.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")))
-    assert.match(twice.text, /omarchy-shell shell toggle modoterra\.waki/)
+    assert.match(twice.text, /omarchy-shell shell toggle com\.mdtrr\.waki/)
   })
 
   it("skips the keybind when the chord is already used outside the block", () => {
@@ -200,7 +215,7 @@ describe("marked blocks", () => {
     const applied = WakiModel.applyKeybindBlock("keep me\n", chord)
     const removed = WakiModel.removeKeybindBlock(applied.text)
     assert.match(removed, /keep me/)
-    assert.doesNotMatch(removed, /modoterra\.waki/)
+    assert.doesNotMatch(removed, /com\.mdtrr\.waki/)
   })
 
   it("inserts a waki menu row after the opening brace", () => {
@@ -210,17 +225,25 @@ describe("marked blocks", () => {
     assert.equal(once.changed, true)
     assert.equal(twice.changed, false)
     assert.match(once.text, /"waki"\s*:/)
-    assert.match(once.text, /omarchy-shell shell toggle modoterra\.waki/)
+    assert.match(once.text, /omarchy-shell shell toggle com\.mdtrr\.waki/)
+  })
+
+  it("rewrites the menu action when the plugin id changes", () => {
+    const stale = '{\n  "waki": {"icon":"x","label":"Waki","action":"omarchy-shell shell toggle modoterra.waki"}\n}\n'
+    const result = WakiModel.applyMenuEntry(stale)
+    assert.equal(result.changed, true)
+    assert.match(result.text, /toggle com\.mdtrr\.waki/)
+    assert.doesNotMatch(result.text, /toggle modoterra\.waki/)
   })
 
   it("writes a bashrc alias block that sources the given file", () => {
-    const aliasFile = "/plugins/modoterra.waki/aliases/git.sh"
+    const aliasFile = "/plugins/com.mdtrr.waki/aliases/git.sh"
     const once = WakiModel.applyAliasBlock("export PATH=1\n", aliasFile)
     const twice = WakiModel.applyAliasBlock(once.text, aliasFile)
     assert.equal(once.changed, true)
     assert.equal(twice.changed, false)
     assert.match(once.text, /export PATH=1/)
-    assert.match(once.text, /source "\/plugins\/modoterra\.waki\/aliases\/git\.sh"/)
+    assert.match(once.text, /source "\/plugins\/com\.mdtrr\.waki\/aliases\/git\.sh"/)
     const removed = WakiModel.removeAliasBlock(once.text)
     assert.match(removed, /export PATH=1/)
     assert.doesNotMatch(removed, /waki git aliases/)

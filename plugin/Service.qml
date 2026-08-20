@@ -92,10 +92,9 @@ Item {
         root.hooksDir + "/"])
     }
 
-    if (root.state.setupApplied) return
-
     var notes = []
-    var keybind = WakiModel.applyKeybindBlock(root.bindingsText, WakiModel.defaultKeybindChord())
+    var createIfMissing = !root.state.setupApplied
+    var keybind = WakiModel.applyKeybindBlock(root.bindingsText, WakiModel.defaultKeybindChord(), createIfMissing)
     if (keybind.skipped === "taken") {
       notes.push(WakiModel.defaultKeybindChord() + " is already bound")
     } else if (keybind.changed) {
@@ -104,15 +103,17 @@ Item {
       notes.push("Bound " + WakiModel.defaultKeybindChord())
     }
 
-    var menu = WakiModel.applyMenuEntry(root.menuText || "{\n}\n")
+    var menu = WakiModel.applyMenuEntry(root.menuText || "{\n}\n", createIfMissing)
     if (menu.changed) {
       enqueueWrite(root.menuPath, menu.text)
       root.menuText = menu.text
     }
 
-    var next = WakiModel.parseState(WakiModel.serializeState(root.state))
-    next.setupApplied = true
-    replaceState(next)
+    if (!root.state.setupApplied) {
+      var next = WakiModel.parseState(WakiModel.serializeState(root.state))
+      next.setupApplied = true
+      replaceState(next)
+    }
     root.setupNote = notes.join(". ")
   }
 
