@@ -1,0 +1,722 @@
+[
+  {
+    "name": "ChatGPT",
+    "url": "https://chatgpt.com",
+    "iconSlug": "chatgpt",
+    "category": "ai"
+  },
+  {
+    "name": "Claude",
+    "url": "https://claude.ai",
+    "iconSlug": "claude-ai",
+    "category": "ai"
+  },
+  {
+    "name": "Gemini",
+    "url": "https://gemini.google.com",
+    "iconSlug": "google-gemini",
+    "category": "ai"
+  },
+  {
+    "name": "Perplexity",
+    "url": "https://perplexity.ai",
+    "iconSlug": "perplexity",
+    "category": "ai"
+  },
+  {
+    "name": "Grok",
+    "url": "https://grok.com",
+    "iconSlug": "grok",
+    "category": "ai"
+  },
+  {
+    "name": "Copilot",
+    "url": "https://copilot.microsoft.com",
+    "iconSlug": "microsoft-copilot",
+    "category": "ai"
+  },
+  {
+    "name": "Hugging Face",
+    "url": "https://huggingface.co",
+    "iconSlug": "hugging-face",
+    "category": "ai"
+  },
+  {
+    "name": "DeepSeek",
+    "url": "https://chat.deepseek.com",
+    "iconSlug": "deepseek",
+    "category": "ai"
+  },
+  {
+    "name": "Cloudflare",
+    "url": "https://dash.cloudflare.com",
+    "iconSlug": "cloudflare",
+    "category": "cloud"
+  },
+  {
+    "name": "AWS Console",
+    "url": "https://console.aws.amazon.com",
+    "iconSlug": "aws",
+    "category": "cloud"
+  },
+  {
+    "name": "Google Cloud",
+    "url": "https://console.cloud.google.com",
+    "iconSlug": "google-cloud",
+    "category": "cloud"
+  },
+  {
+    "name": "Azure",
+    "url": "https://portal.azure.com",
+    "iconSlug": "azure",
+    "category": "cloud"
+  },
+  {
+    "name": "Vercel",
+    "url": "https://vercel.com/dashboard",
+    "iconSlug": "vercel",
+    "category": "cloud"
+  },
+  {
+    "name": "Netlify",
+    "url": "https://app.netlify.com",
+    "iconSlug": "netlify",
+    "category": "cloud"
+  },
+  {
+    "name": "DigitalOcean",
+    "url": "https://cloud.digitalocean.com",
+    "iconSlug": "digitalocean",
+    "category": "cloud"
+  },
+  {
+    "name": "Hetzner",
+    "url": "https://console.hetzner.cloud",
+    "iconSlug": "hetzner",
+    "category": "cloud"
+  },
+  {
+    "name": "Railway",
+    "url": "https://railway.app/dashboard",
+    "iconSlug": "railway",
+    "category": "cloud"
+  },
+  {
+    "name": "Fly.io",
+    "url": "https://fly.io/dashboard",
+    "iconSlug": "fly-io",
+    "category": "cloud"
+  },
+  {
+    "name": "Render",
+    "url": "https://dashboard.render.com",
+    "iconSlug": "render",
+    "category": "cloud"
+  },
+  {
+    "name": "Linode",
+    "url": "https://cloud.linode.com",
+    "iconSlug": "linode",
+    "category": "cloud"
+  },
+  {
+    "name": "Discord",
+    "url": "https://discord.com/app",
+    "iconSlug": "discord",
+    "category": "communication"
+  },
+  {
+    "name": "Slack",
+    "url": "https://app.slack.com",
+    "iconSlug": "slack",
+    "category": "communication"
+  },
+  {
+    "name": "WhatsApp",
+    "url": "https://web.whatsapp.com",
+    "iconSlug": "whatsapp",
+    "category": "communication"
+  },
+  {
+    "name": "Telegram",
+    "url": "https://web.telegram.org",
+    "iconSlug": "telegram",
+    "category": "communication"
+  },
+  {
+    "name": "Microsoft Teams",
+    "url": "https://teams.microsoft.com",
+    "iconSlug": "microsoft-teams",
+    "category": "communication"
+  },
+  {
+    "name": "Zoom",
+    "url": "https://app.zoom.us",
+    "iconSlug": "zoom",
+    "category": "communication"
+  },
+  {
+    "name": "Element",
+    "url": "https://app.element.io",
+    "iconSlug": "element",
+    "category": "communication"
+  },
+  {
+    "name": "Google Chat",
+    "url": "https://chat.google.com",
+    "iconSlug": "google-chat",
+    "category": "communication"
+  },
+  {
+    "name": "Skype",
+    "url": "https://web.skype.com",
+    "iconSlug": "skype",
+    "category": "communication"
+  },
+  {
+    "name": "Figma",
+    "url": "https://figma.com",
+    "iconSlug": "figma",
+    "category": "design"
+  },
+  {
+    "name": "Canva",
+    "url": "https://canva.com",
+    "iconSlug": "canva",
+    "category": "design"
+  },
+  {
+    "name": "Miro",
+    "url": "https://miro.com",
+    "iconSlug": "miro",
+    "category": "design"
+  },
+  {
+    "name": "Excalidraw",
+    "url": "https://excalidraw.com",
+    "iconSlug": "excalidraw",
+    "category": "design"
+  },
+  {
+    "name": "GitHub",
+    "url": "https://github.com",
+    "iconSlug": "github",
+    "category": "development"
+  },
+  {
+    "name": "GitLab",
+    "url": "https://gitlab.com",
+    "iconSlug": "gitlab",
+    "category": "development"
+  },
+  {
+    "name": "Bitbucket",
+    "url": "https://bitbucket.org",
+    "iconSlug": "bitbucket",
+    "category": "development"
+  },
+  {
+    "name": "Docker Hub",
+    "url": "https://hub.docker.com",
+    "iconSlug": "docker",
+    "category": "development"
+  },
+  {
+    "name": "Linear",
+    "url": "https://linear.app",
+    "iconSlug": "linear",
+    "category": "development"
+  },
+  {
+    "name": "Jira",
+    "url": "https://jira.atlassian.com",
+    "iconSlug": "jira",
+    "category": "development"
+  },
+  {
+    "name": "Sentry",
+    "url": "https://sentry.io",
+    "iconSlug": "sentry",
+    "category": "development"
+  },
+  {
+    "name": "Grafana",
+    "url": "https://grafana.com",
+    "iconSlug": "grafana",
+    "category": "development"
+  },
+  {
+    "name": "Stack Overflow",
+    "url": "https://stackoverflow.com",
+    "iconSlug": "stackoverflow",
+    "category": "development"
+  },
+  {
+    "name": "CodePen",
+    "url": "https://codepen.io",
+    "iconSlug": "codepen",
+    "category": "development"
+  },
+  {
+    "name": "Portainer",
+    "url": "https://portainer.io",
+    "iconSlug": "portainer",
+    "category": "development"
+  },
+  {
+    "name": "Gitea",
+    "url": "https://gitea.com",
+    "iconSlug": "gitea",
+    "category": "development"
+  },
+  {
+    "name": "Gmail",
+    "url": "https://mail.google.com",
+    "iconSlug": "gmail",
+    "category": "email"
+  },
+  {
+    "name": "Outlook",
+    "url": "https://outlook.live.com",
+    "iconSlug": "microsoft-outlook",
+    "category": "email"
+  },
+  {
+    "name": "Fastmail",
+    "url": "https://app.fastmail.com",
+    "iconSlug": "fastmail",
+    "category": "email"
+  },
+  {
+    "name": "HEY",
+    "url": "https://app.hey.com",
+    "iconSlug": "hey",
+    "category": "email"
+  },
+  {
+    "name": "Tutanota",
+    "url": "https://app.tuta.com",
+    "iconSlug": "tutanota",
+    "category": "email"
+  },
+  {
+    "name": "Zoho Mail",
+    "url": "https://mail.zoho.com",
+    "iconSlug": "zoho-mail",
+    "category": "email"
+  },
+  {
+    "name": "Skiff Mail",
+    "url": "https://app.skiff.com",
+    "iconSlug": "skiff",
+    "category": "email"
+  },
+  {
+    "name": "PayPal",
+    "url": "https://paypal.com",
+    "iconSlug": "paypal",
+    "category": "finance"
+  },
+  {
+    "name": "Stripe",
+    "url": "https://dashboard.stripe.com",
+    "iconSlug": "stripe",
+    "category": "finance"
+  },
+  {
+    "name": "Wise",
+    "url": "https://wise.com",
+    "iconSlug": "wise",
+    "category": "finance"
+  },
+  {
+    "name": "Coinbase",
+    "url": "https://coinbase.com",
+    "iconSlug": "coinbase",
+    "category": "finance"
+  },
+  {
+    "name": "Google Calendar",
+    "url": "https://calendar.google.com",
+    "iconSlug": "google-calendar",
+    "category": "google"
+  },
+  {
+    "name": "Google Drive",
+    "url": "https://drive.google.com",
+    "iconSlug": "google-drive",
+    "category": "google"
+  },
+  {
+    "name": "Google Maps",
+    "url": "https://maps.google.com",
+    "iconSlug": "google-maps",
+    "category": "google"
+  },
+  {
+    "name": "Google Photos",
+    "url": "https://photos.google.com",
+    "iconSlug": "google-photos",
+    "category": "google"
+  },
+  {
+    "name": "Google Contacts",
+    "url": "https://contacts.google.com",
+    "iconSlug": "google-contacts",
+    "category": "google"
+  },
+  {
+    "name": "Google Keep",
+    "url": "https://keep.google.com",
+    "iconSlug": "google-keep",
+    "category": "google"
+  },
+  {
+    "name": "Google Meet",
+    "url": "https://meet.google.com",
+    "iconSlug": "google-meet",
+    "category": "google"
+  },
+  {
+    "name": "Google Docs",
+    "url": "https://docs.google.com",
+    "iconSlug": "google-docs",
+    "category": "google"
+  },
+  {
+    "name": "Google Sheets",
+    "url": "https://sheets.google.com",
+    "iconSlug": "google-sheets",
+    "category": "google"
+  },
+  {
+    "name": "Apple Music",
+    "url": "https://music.apple.com",
+    "iconSlug": "apple-music",
+    "category": "media"
+  },
+  {
+    "name": "Spotify",
+    "url": "https://open.spotify.com",
+    "iconSlug": "spotify",
+    "category": "media"
+  },
+  {
+    "name": "YouTube",
+    "url": "https://youtube.com",
+    "iconSlug": "youtube",
+    "category": "media"
+  },
+  {
+    "name": "YouTube Music",
+    "url": "https://music.youtube.com",
+    "iconSlug": "youtube-music",
+    "category": "media"
+  },
+  {
+    "name": "Netflix",
+    "url": "https://netflix.com",
+    "iconSlug": "netflix",
+    "category": "media"
+  },
+  {
+    "name": "Disney+",
+    "url": "https://disneyplus.com",
+    "iconSlug": "disney-plus",
+    "category": "media"
+  },
+  {
+    "name": "Hulu",
+    "url": "https://hulu.com",
+    "iconSlug": "hulu",
+    "category": "media"
+  },
+  {
+    "name": "Max",
+    "url": "https://max.com",
+    "iconSlug": "hbo-max",
+    "category": "media"
+  },
+  {
+    "name": "Twitch",
+    "url": "https://twitch.tv",
+    "iconSlug": "twitch",
+    "category": "media"
+  },
+  {
+    "name": "SoundCloud",
+    "url": "https://soundcloud.com",
+    "iconSlug": "soundcloud",
+    "category": "media"
+  },
+  {
+    "name": "Tidal",
+    "url": "https://listen.tidal.com",
+    "iconSlug": "tidal",
+    "category": "media"
+  },
+  {
+    "name": "Plex",
+    "url": "https://app.plex.tv",
+    "iconSlug": "plex",
+    "category": "media"
+  },
+  {
+    "name": "Jellyfin",
+    "url": "https://jellyfin.org",
+    "iconSlug": "jellyfin",
+    "category": "media"
+  },
+  {
+    "name": "Deezer",
+    "url": "https://deezer.com",
+    "iconSlug": "deezer",
+    "category": "media"
+  },
+  {
+    "name": "Amazon Music",
+    "url": "https://music.amazon.com",
+    "iconSlug": "amazon-music",
+    "category": "media"
+  },
+  {
+    "name": "Crunchyroll",
+    "url": "https://crunchyroll.com",
+    "iconSlug": "crunchyroll",
+    "category": "media"
+  },
+  {
+    "name": "Peacock",
+    "url": "https://peacocktv.com",
+    "iconSlug": "peacock",
+    "category": "media"
+  },
+  {
+    "name": "Notion",
+    "url": "https://notion.so",
+    "iconSlug": "notion",
+    "category": "productivity"
+  },
+  {
+    "name": "Todoist",
+    "url": "https://todoist.com",
+    "iconSlug": "todoist",
+    "category": "productivity"
+  },
+  {
+    "name": "Trello",
+    "url": "https://trello.com",
+    "iconSlug": "trello",
+    "category": "productivity"
+  },
+  {
+    "name": "Asana",
+    "url": "https://app.asana.com",
+    "iconSlug": "asana",
+    "category": "productivity"
+  },
+  {
+    "name": "Airtable",
+    "url": "https://airtable.com",
+    "iconSlug": "airtable",
+    "category": "productivity"
+  },
+  {
+    "name": "ClickUp",
+    "url": "https://app.clickup.com",
+    "iconSlug": "clickup",
+    "category": "productivity"
+  },
+  {
+    "name": "Monday.com",
+    "url": "https://monday.com",
+    "iconSlug": "monday",
+    "category": "productivity"
+  },
+  {
+    "name": "Coda",
+    "url": "https://coda.io",
+    "iconSlug": "coda",
+    "category": "productivity"
+  },
+  {
+    "name": "Basecamp",
+    "url": "https://basecamp.com",
+    "iconSlug": "basecamp",
+    "category": "productivity"
+  },
+  {
+    "name": "Obsidian",
+    "url": "https://obsidian.md",
+    "iconSlug": "obsidian",
+    "category": "productivity"
+  },
+  {
+    "name": "Proton Mail",
+    "url": "https://mail.proton.me",
+    "iconSlug": "protonmail",
+    "category": "proton"
+  },
+  {
+    "name": "Proton Drive",
+    "url": "https://drive.proton.me",
+    "iconSlug": "proton-drive",
+    "category": "proton"
+  },
+  {
+    "name": "Proton Calendar",
+    "url": "https://calendar.proton.me",
+    "iconSlug": "proton-calendar",
+    "category": "proton"
+  },
+  {
+    "name": "Proton VPN",
+    "url": "https://account.protonvpn.com",
+    "iconSlug": "proton-vpn",
+    "category": "proton"
+  },
+  {
+    "name": "Proton Pass",
+    "url": "https://pass.proton.me",
+    "iconSlug": "proton-pass",
+    "category": "proton"
+  },
+  {
+    "name": "X",
+    "url": "https://x.com",
+    "iconSlug": "x",
+    "category": "social"
+  },
+  {
+    "name": "Reddit",
+    "url": "https://reddit.com",
+    "iconSlug": "reddit",
+    "category": "social"
+  },
+  {
+    "name": "Mastodon",
+    "url": "https://mastodon.social",
+    "iconSlug": "mastodon",
+    "category": "social"
+  },
+  {
+    "name": "Bluesky",
+    "url": "https://bsky.app",
+    "iconSlug": "bluesky",
+    "category": "social"
+  },
+  {
+    "name": "Threads",
+    "url": "https://threads.net",
+    "iconSlug": "threads",
+    "category": "social"
+  },
+  {
+    "name": "LinkedIn",
+    "url": "https://linkedin.com",
+    "iconSlug": "linkedin",
+    "category": "social"
+  },
+  {
+    "name": "Instagram",
+    "url": "https://instagram.com",
+    "iconSlug": "instagram",
+    "category": "social"
+  },
+  {
+    "name": "Facebook",
+    "url": "https://facebook.com",
+    "iconSlug": "facebook",
+    "category": "social"
+  },
+  {
+    "name": "Pinterest",
+    "url": "https://pinterest.com",
+    "iconSlug": "pinterest",
+    "category": "social"
+  },
+  {
+    "name": "TikTok",
+    "url": "https://tiktok.com",
+    "iconSlug": "tiktok",
+    "category": "social"
+  },
+  {
+    "name": "Hacker News",
+    "url": "https://news.ycombinator.com",
+    "iconSlug": "hacker-news",
+    "category": "social"
+  },
+  {
+    "name": "Amazon",
+    "url": "https://amazon.com",
+    "iconSlug": "amazon",
+    "category": "shopping"
+  },
+  {
+    "name": "eBay",
+    "url": "https://ebay.com",
+    "iconSlug": "ebay",
+    "category": "shopping"
+  },
+  {
+    "name": "Etsy",
+    "url": "https://etsy.com",
+    "iconSlug": "etsy",
+    "category": "shopping"
+  },
+  {
+    "name": "AliExpress",
+    "url": "https://aliexpress.com",
+    "iconSlug": "aliexpress",
+    "category": "shopping"
+  },
+  {
+    "name": "Wikipedia",
+    "url": "https://wikipedia.org",
+    "iconSlug": "wikipedia",
+    "category": "utilities"
+  },
+  {
+    "name": "Bitwarden",
+    "url": "https://vault.bitwarden.com",
+    "iconSlug": "bitwarden",
+    "category": "utilities"
+  },
+  {
+    "name": "1Password",
+    "url": "https://my.1password.com",
+    "iconSlug": "1password",
+    "category": "utilities"
+  },
+  {
+    "name": "Speedtest",
+    "url": "https://speedtest.net",
+    "iconSlug": "speedtest",
+    "category": "utilities"
+  },
+  {
+    "name": "DeepL",
+    "url": "https://deepl.com/translator",
+    "iconSlug": "deepl",
+    "category": "utilities"
+  },
+  {
+    "name": "WolframAlpha",
+    "url": "https://wolframalpha.com",
+    "iconSlug": "wolfram",
+    "category": "utilities"
+  },
+  {
+    "name": "Raindrop.io",
+    "url": "https://app.raindrop.io",
+    "iconSlug": "raindrop",
+    "category": "utilities"
+  },
+  {
+    "name": "Pocket",
+    "url": "https://getpocket.com",
+    "iconSlug": "pocket",
+    "category": "utilities"
+  }
+]
