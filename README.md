@@ -44,13 +44,15 @@ Waki fires hooks via `omarchy-hook` after installs and removals. Create executab
 
 ## How it works
 
-State lives in `~/.local/share/waki/state.json`. The catalog ships as `plugin/catalog.json` inside the plugin. Adding an app downloads an icon, writes a `.desktop` file under `~/.local/share/applications/`, and launches later through `omarchy-launch-webapp`.
+State lives in `~/.local/state/waki/state.json`. The catalog ships as `plugin/catalog.json` inside the plugin. Adding an app downloads an icon, writes a `.desktop` file under `~/.local/share/applications/`, and launches later through `omarchy-launch-webapp`.
+
+Older `install.sh` checkouts kept a SQLite database at `~/.local/share/waki/database/waki.db`. On first enable the service imports those installs if no state file exists yet.
 
 The overlay and setup service run inside `omarchy-shell`. Plugins are unsandboxed user code. Read the checkout before you enable it.
 
 ## Safety and data
 
-The state file, desktop entries, and Chromium profiles stay on your machine. `omarchy plugin update` pulls git into the plugin directory and does not overwrite `state.json`.
+The state file, desktop entries, and Chromium profiles stay on your machine. `omarchy plugin update` pulls git into the plugin directory and does not overwrite `~/.local/state/waki/state.json`.
 
 ## Contributing
 

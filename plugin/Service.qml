@@ -12,9 +12,10 @@ Item {
 
   readonly property string home: Quickshell.env("HOME")
   readonly property string sourceDir: manifest && manifest.__sourceDir ? String(manifest.__sourceDir) : ""
-  readonly property string dataDir: home + "/.local/share/waki"
+  readonly property string dataDir: home + "/.local/state/waki"
   readonly property string statePath: dataDir + "/state.json"
-  readonly property string legacyDbPath: dataDir + "/database/waki.db"
+  readonly property string legacyStatePath: home + "/.local/share/waki/state.json"
+  readonly property string legacyDbPath: home + "/.local/share/waki/database/waki.db"
   readonly property string catalogPath: sourceDir ? sourceDir + "/plugin/catalog.json" : ""
   readonly property string aliasFilePath: sourceDir ? sourceDir + "/aliases/git.sh" : ""
   readonly property string hooksSourceDir: sourceDir ? sourceDir + "/hooks" : ""
@@ -50,6 +51,7 @@ Item {
   property string bashrcText: ""
   property string pendingWritePath: ""
   property string pendingWriteText: ""
+  property string legacyStateReadPath: ""
   property var writeQueue: []
   property bool writeBusy: false
 
@@ -343,6 +345,7 @@ Item {
           label: WakiModel.desktopLabel(row.name, directory, displayName, root.profiles.length)
         })
       }
+      if (next.installs.length > 0) next.firstRunCompleted = true
       root.state = next
       persistState()
       root.refreshLaunchers(true)
@@ -405,6 +408,29 @@ Item {
       root.tryFinishSetup()
     }
     onLoadFailed: {
+      if (root.legacyStatePath) {
+        root.legacyStateReadPath = root.legacyStatePath
+        return
+      }
+      root.state = WakiModel.emptyState()
+      root.stateLoaded = true
+      root.tryFinishSetup()
+    }
+  }
+
+  FileView {
+    id: legacyStateFile
+    path: root.legacyStateReadPath
+    printErrors: false
+    onLoaded: {
+      if (root.stateLoaded) return
+      root.state = WakiModel.parseState(text())
+      root.stateLoaded = true
+      persistState()
+      root.tryFinishSetup()
+    }
+    onLoadFailed: {
+      if (root.stateLoaded) return
       root.state = WakiModel.emptyState()
       root.stateLoaded = true
       root.tryFinishSetup()
