@@ -109,6 +109,10 @@ Waki stores its state in a local SQLite database. The database lives at `databas
 
 See `CONTRIBUTING.md` for setup, tests, and style guidelines.
 
+## Community
+
+Use common sense and decency. There is no formal code of conduct. We reserve the right to moderate this community to the extent of the law and the policy of the host. Write community@modoterra.xyz if you need us.
+
 ## Security
 
 See `SECURITY.md` for reporting instructions.
