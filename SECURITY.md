@@ -19,3 +19,5 @@ We will acknowledge receipt within 48 hours and aim to provide a fix or mitigati
 ## Supported versions
 
 Only the latest `main` and `canary` branches are supported.
+
+Waki runs inside `omarchy-shell` as unsandboxed user code once the plugin is enabled. Treat third-party plugin checkouts the same way you treat any software you run as your user.

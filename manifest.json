@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "id": "com.mdtrr.waki",
+  "name": "Waki",
+  "version": "0.5.0",
+  "author": "Modoterra",
+  "description": "Mise en place for Omarchy. Catalog of web apps as standalone desktop windows.",
+  "kinds": ["overlay", "service"],
+  "keepLoaded": true,
+  "entryPoints": {
+    "overlay": "plugin/Overlay.qml",
+    "service": "plugin/Service.qml"
+  }
+}

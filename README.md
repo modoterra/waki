@@ -2,108 +2,57 @@
 
 **Mise en place for [Omarchy](https://omarchy.com).**
 
-Waki turns web apps into standalone desktop windows using Chromium's `--app` mode. A curated catalog of 120+ apps, Chromium profile isolation, and a simple TUI — that's it.
+Waki is an Omarchy shell plugin. It turns a curated catalog of 120+ web apps into standalone desktop windows through Chromium `--app` mode, with optional profile isolation.
 
 The name comes from the Japanese kitchen hierarchy: the *wakiita* (脇板) is the chef's trusted second, the one who makes sure everything is in its place before service begins.
 
 ## Install
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/modoterra/waki/main/install.sh | bash
+omarchy plugin add https://github.com/modoterra/waki.git --enable
 ```
 
-Or clone and run locally:
+That clones the plugin into `~/.config/omarchy/plugins/com.mdtrr.waki/`, validates `manifest.json`, and enables it. On first enable the service writes a Super+Shift+Alt+W keybind (if that chord is free) and a **Waki** row in the Omarchy menu.
+
+Open Waki with Super+Shift+Alt+W, the Omarchy menu, or:
 
 ```bash
-git clone https://github.com/modoterra/waki.git
-cd waki && bash install.sh
+omarchy-shell shell toggle com.mdtrr.waki
 ```
 
-Launch with `waki` or press **SUPER SHIFT W**.
+Update with `omarchy plugin update com.mdtrr.waki`. Remove desktop integration from Waki's Uninstall action, then `omarchy plugin remove com.mdtrr.waki`.
 
 ## What it does
 
 - **Curated catalog** of 120+ web apps across 14 categories
-- **Standalone windows** via Chromium `--app` mode — no browser chrome, no tabs
-- **Multi-profile** — install the same app on different Chromium profiles (work vs personal)
-- **Chef's recommendations** — first-run flow suggests essential apps to get started
-- **Self-updating** — `waki update` pulls latest from git and seeds new catalog entries
-- **Channels** — switch between `stable` and `canary`
+- **Standalone windows** via `omarchy-launch-webapp`
+- **Multi-profile** Chromium installs (work vs personal)
+- **Chef's recommendations** on first open
+- **Git aliases** (optional Oh My Zsh-style bundle in `~/.bashrc`)
+- **VS Code** install through `omarchy-install-vscode`
 
-## Commands
-
-Run `waki` for the interactive TUI, or use commands directly:
-
-```
-waki webapp add       Add web apps from the catalog
-waki webapp remove    Remove installed web apps
-waki webapp refresh   Regenerate desktop entries
-waki app add [name]   Install supported app via Omarchy
-waki app status       Show VS Code bootstrap status
-waki alias add        Add Oh My Zsh-style git aliases to ~/.bashrc
-waki alias remove     Remove Waki git aliases from ~/.bashrc
-waki alias refresh    Refresh the Waki git alias block in ~/.bashrc
-waki alias status     Show git alias status
-waki channel [name]   Switch between stable / canary
-waki update           Update Waki from git
-waki about            Show version and stats
-waki uninstall        Completely remove Waki
-waki help             Show this help
-```
-
-## Git aliases
-
-Waki ships an extensive Oh My Zsh-inspired git alias bundle at `lib/aliases/git.sh`.
-
-Enable it on demand:
-
-```bash
-waki alias add
-```
-
-This writes a managed block in `~/.bashrc` that sources Waki's alias file. Use `waki alias remove` to remove it, `waki alias refresh` after updates, or `waki alias status` to check whether the block is enabled.
-
-## Apps
-
-Use `waki app add` to pick from supported apps (currently `vscode`). Waki delegates installation to `omarchy-install-vscode` for canonical Omarchy behavior.
-
-For bootstrap path detection, Waki targets `~/.config/Code/User/settings.json`.
-
-Run `waki app status` to see whether VS Code is installed and which settings target path Waki will use.
+Super+Shift+W stays Omawrite. Waki uses Super+Shift+Alt+W.
 
 ## Hooks
 
-Waki fires hooks via `omarchy-hook` after installs and removals. Create executable scripts in `~/.config/omarchy/hooks/`:
+Waki fires hooks via `omarchy-hook` after installs and removals. Create executable scripts in `~/.config/omarchy/hooks/` (sample files are copied on enable; drop `.sample` to activate):
 
 | Hook | Arguments | Fired when |
 |------|-----------|------------|
 | `waki-webapp-install` | `$1` app name, `$2` app URL | After adding a web app |
 | `waki-webapp-remove` | `$1` app label | After removing a web app |
 
-Sample hooks are in `hooks/` and copied to `~/.config/omarchy/hooks/` during installation. Remove `.sample` to activate.
-
-## Dependencies
-
-- [gum](https://github.com/charmbracelet/gum) — terminal UI
-- [sqlite3](https://sqlite.org/) — database
-- [jq](https://jqlang.github.io/jq/) — JSON parsing
-- [curl](https://curl.se/) — icon downloads
-- [Chromium](https://www.chromium.org/) — browser runtime
-
 ## How it works
 
-Waki keeps an SQLite database with the app catalog, Chromium profiles, and installs. When you add an app:
+State lives in `~/.local/state/waki/state.json`. The catalog ships as `plugin/catalog.json` inside the plugin. Adding an app downloads an icon, writes a `.desktop` file under `~/.local/share/applications/`, and launches later through `omarchy-launch-webapp`.
 
-1. Picks a Chromium profile (if you have more than one)
-2. Downloads the icon from [dashboard-icons](https://github.com/homarr-labs/dashboard-icons)
-3. Creates a `.desktop` file in `~/.local/share/applications/`
-4. The `.desktop` file calls `waki-webapp-launch <install-id>`, which queries the DB for the URL and profile, then launches Chromium in `--app` mode
+Older `install.sh` checkouts kept a SQLite database at `~/.local/share/waki/database/waki.db`. On first enable the service imports those installs if no state file exists yet.
 
-Each app + profile combo gets its own desktop entry, so the same app on different profiles appears as separate launchers.
+The overlay and setup service run inside `omarchy-shell`. Plugins are unsandboxed user code. Read the checkout before you enable it.
 
 ## Safety and data
 
-Waki stores its state in a local SQLite database. The database lives at `database/waki.db` when you run from a local repo, or `~/.local/share/waki/database/waki.db` when installed via the script. The database and Chromium profiles are local-only and never leave your machine.
+The state file, desktop entries, and Chromium profiles stay on your machine. `omarchy plugin update` pulls git into the plugin directory and does not overwrite `~/.local/state/waki/state.json`.
 
 ## Contributing
 

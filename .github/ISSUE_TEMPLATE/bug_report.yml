@@ -38,6 +38,6 @@ body:
     id: version
     attributes:
       label: Version
-      description: Output of `waki about` or git commit
+      description: Plugin version from the About screen, or git commit
     validations:
       required: false

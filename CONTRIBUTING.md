@@ -1,36 +1,39 @@
 # Contributing
 
-Waki is part of the [Omarchy](https://omarchy.com) ecosystem. Contributions are welcome.
+Waki is an [Omarchy](https://omarchy.com) shell plugin. Contributions are welcome.
 
 ## Getting started
 
 ```bash
 git clone https://github.com/modoterra/waki.git
 cd waki
+omarchy plugin validate .
 ```
 
-Run locally without installing:
+For a live session, copy or clone this repo into `~/.config/omarchy/plugins/com.mdtrr.waki/` (not a symlink; `omarchy plugin add` rejects symlinks), then:
 
 ```bash
-./bin/waki
+omarchy-shell shell rescanPlugins
+omarchy plugin enable com.mdtrr.waki
+omarchy-shell shell toggle com.mdtrr.waki
 ```
 
 ## Running tests
 
-Tests use [Bats](https://github.com/bats-core/bats-core) (included as a git submodule):
-
 ```bash
-git submodule update --init --recursive
-./test/bats/bin/bats test/
+node --test test/waki-model.test.js
+omarchy plugin validate .
 ```
+
+`omarchy plugin validate` walks the tree for symlinks. Run it on a checkout that matches `omarchy plugin add` (no extra linked files).
 
 ## Code style
 
-- Bash. No Python, no Node, no Ruby.
-- Minimalism is key. Less code is better code.
-- Functions prefixed with `waki_`.
-- SQL tables prefixed with `waki_`.
-- No large ASCII art or decorative comment blocks.
+- Plugin UI and setup: QML + JavaScript under `plugin/`, following first-party Omarchy overlay patterns (`open` / `close` / `opened`, `qs.Commons`, `qs.Ui`).
+- Catalog data: `plugin/catalog.json`.
+- Domain helpers belong in `plugin/WakiModel.js` so `node --test` can cover them.
+- Optional git aliases remain a bash source file at `aliases/git.sh` because that is what `~/.bashrc` sources.
+- Functions in `WakiModel.js` stay small and named in full.
 
 ## Commit messages
 

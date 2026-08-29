@@ -1,8 +1,3 @@
-database/waki.db
-database/waki.db-journal
-database/waki.db-wal
-database/waki.db-shm
-
 # Environment and secrets
 .env
 .env.*
